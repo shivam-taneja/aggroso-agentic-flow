@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GeminiModule } from './modules/gemini/gemini.module';
+import { WorkflowModule } from './modules/workflow/workflow.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { GeminiModule } from './modules/gemini/gemini.module';
     }),
 
     GeminiModule,
+    WorkflowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
