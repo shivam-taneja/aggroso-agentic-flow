@@ -3,9 +3,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { GeminiModule } from './modules/gemini/gemini.module';
+import { HealthModule } from './modules/health/health.module';
 import { Workflow } from './modules/workflow/entities/workflow.entity';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 
@@ -134,8 +133,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
 
     GeminiModule,
     WorkflowModule,
+    HealthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
