@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WORKFLOW_QUEUE } from '../workflow/workflow.constants';
 import { HealthController } from './health.controller';
+import { HealthService } from './health.service';
 
 @Module({
   imports: [
@@ -12,5 +13,6 @@ import { HealthController } from './health.controller';
     }),
   ],
   controllers: [HealthController],
+  providers: [HealthService],
 })
 export class HealthModule {}
