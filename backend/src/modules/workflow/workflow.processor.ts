@@ -62,8 +62,8 @@ export class WorkflowProcessor extends WorkerHost {
           Do not include conversational filler like "Here is the summary:".
         `;
 
-        // const output = await this.geminiService.generateText(prompt);
-        const output = `${index} | ${prompt}`;
+        const output = await this.geminiService.generateText(prompt);
+
         resultsLog.push({ step: stepInstruction, output });
 
         workflow.results = [...resultsLog];
