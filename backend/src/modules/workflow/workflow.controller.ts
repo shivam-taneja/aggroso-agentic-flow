@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -24,7 +25,16 @@ export class WorkflowController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  findOne(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        version: '4',
+        exceptionFactory: () => new BadRequestException('Invalid Workflow ID!'),
+      }),
+    )
+    id: string,
+  ) {
     return this.workflowService.findOne(id);
   }
 }
