@@ -1,6 +1,7 @@
 'use client';
 
 import { AppSidebar } from '@/components/sidebar';
+import { ModeToggle } from '@/components/theme-toggle';
 import {
   SidebarInset,
   SidebarProvider,
@@ -148,9 +149,11 @@ export default function Dashboard() {
           <div className="flex-1 text-sm font-medium text-muted-foreground">
             {selectedWorkflow ? 'Workflow Details' : 'New Workflow'}
           </div>
+
+          <ModeToggle />
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-slate-50/50 p-4 md:p-8 relative">
+        <main className="flex-1 overflow-y-auto bg-muted/30 p-4 md:p-8 relative">
           <div className="max-w-4xl mx-auto">
             {selectedId ? (
               isWorkflowLoading || !selectedWorkflow ? (
