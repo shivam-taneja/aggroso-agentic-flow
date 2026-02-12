@@ -32,10 +32,13 @@ export class WorkflowService {
     return savedWorkflow;
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
     return this.workflowRepo.find({
       order: { createdAt: 'DESC' },
-      take: 10,
+      skip: skip,
+      take: limit,
     });
   }
 

@@ -23,9 +23,16 @@ export default function Dashboard() {
 
   const isBackendDown = isHealthChecking || health?.status !== 'ok';
 
-  const { data: history = [], isLoading, isFetching } = useGetWorkflows({
-    enabled: !isBackendDown,
-  });
+  const {
+    data,
+    isLoading,
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useGetWorkflows({ variables: { limit: 10 } });
+
+  const history = data?.pages.flatMap((page) => page) || [];
 
   const { data: selectedWorkflow, isLoading: isWorkflowLoading } = usePollWorkflow({
     variables: { id: selectedId || '' },
@@ -125,6 +132,9 @@ export default function Dashboard() {
     <SidebarProvider>
       <AppSidebar
         history={history}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={isFetchingNextPage}
         isLoading={isHistoryLoading}
         selectedId={selectedId || undefined}
         currentWorkflow={selectedWorkflow}

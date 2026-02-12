@@ -2,10 +2,13 @@ import {
   BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { WorkflowService } from './workflow.service';
@@ -20,8 +23,11 @@ export class WorkflowController {
   }
 
   @Get()
-  findAll() {
-    return this.workflowService.findAll();
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.workflowService.findAll(page, limit);
   }
 
   @Get(':id')
