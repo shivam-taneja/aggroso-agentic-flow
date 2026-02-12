@@ -45,3 +45,12 @@ The application is designed to support both local Docker environments and cloud 
 
 > [!NOTE] 
 > Refer to the [backend README](./backend/README.md) for specific environment variable configurations.
+
+## What is Not Done & Future Improvements
+While the core functionality is complete, the following features were omitted:
+
+- **User Authentication**: The app currently works in a single-tenant mode. In a real-world scenario, I would implement **Auth0** or **NextAuth** to segregate user data.
+- **Database Migrations**: For this demo, I relied on TypeORM's `synchronize: true` to handle schema changes. In a production environment, I would disable synchronization and use proper migration scripts to manage database evolution safely.
+- **Dead Letter Queues (DLQ)**: While the app handles standard errors, I did not implement a DLQ for BullMQ. In production, this would be essential to inspect and retry failed AI jobs manually.
+- **Comprehensive Testing**: I manually tested the end-to-end flows. Ideally, I would add **Jest** unit tests for the backend logic and **Cypress/Playwright** for frontend integration testing.
+- **Rate Limiting**: To prevent abuse of the LLM API, I would implement `ThrottlerModule` in NestJS to rate-limit requests by IP.
