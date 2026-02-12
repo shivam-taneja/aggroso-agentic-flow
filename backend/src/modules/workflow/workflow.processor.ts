@@ -47,9 +47,19 @@ export class WorkflowProcessor extends WorkerHost {
         );
 
         const prompt = `
-          CONTEXT: ${currentContext}
-          INSTRUCTION: ${stepInstruction}
-          OUTPUT: Return ONLY the result. No conversational filler.
+          You are a precise data processing assistant.
+          
+          --- INPUT DATA ---
+          ${currentContext}
+          ------------------
+
+          --- INSTRUCTION ---
+          ${stepInstruction}
+          -------------------
+          
+          OUTPUT REQUIREMENT:
+          Return ONLY the result of the instruction. 
+          Do not include conversational filler like "Here is the summary:".
         `;
 
         const output = await this.geminiService.generateText(prompt);
