@@ -3,16 +3,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Workflow } from '@/types';
-import { Play, Plus } from 'lucide-react';
+import { Loader2, Play, Plus } from 'lucide-react';
 
 interface SidebarProps {
   history: Workflow[];
   selectedId: string | undefined;
+  currentWorkflow: Workflow | null | undefined;
   onSelect: (workflow: Workflow) => void;
   onNew: () => void;
 }
 
-export function Sidebar({ history, selectedId, onSelect, onNew }: SidebarProps) {
+export function Sidebar({ history, selectedId, currentWorkflow, onSelect, onNew }: SidebarProps) {
+  const getBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'COMPLETED': return 'default';
+      case 'FAILED': return 'destructive';
+      case 'IN_PROGRESS': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
   return (
     <aside className="w-80 border-r flex flex-col bg-muted/10 h-full">
       <div className="p-6 border-b bg-background">
@@ -33,35 +43,43 @@ export function Sidebar({ history, selectedId, onSelect, onNew }: SidebarProps) 
 
       <ScrollArea className="flex-1 px-4">
         <div className="space-y-2 pb-4">
-          {history.map((wf) => (
-            <Card
-              key={wf.id}
-              onClick={() => onSelect(wf)}
-              className={`cursor-pointer transition-all hover:bg-accent ${
-                selectedId === wf.id ? 'border-primary bg-accent' : ''
-              }`}
-            >
-              <CardContent className="p-3">
-                <div className="flex justify-between items-start mb-2">
-                  <Badge
-                    variant={wf.status === 'COMPLETED' ? 'default' : 'destructive'}
-                    className="text-[10px] px-1 py-0 h-5"
-                  >
-                    {wf.status}
-                  </Badge>
-                  <span className="text-[10px] text-muted-foreground">
-                    {new Date(wf.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                </div>
-                <p className="text-sm font-medium line-clamp-2 leading-tight text-foreground/90">
-                  {wf.originalInput}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+          {history.map((wf) => {
+            const displayWf = (currentWorkflow && currentWorkflow.id === wf.id)
+              ? currentWorkflow
+              : wf;
+
+            return (
+              <Card
+                key={displayWf.id}
+                onClick={() => onSelect(displayWf)}
+                className={`cursor-pointer transition-all hover:bg-accent ${selectedId === displayWf.id ? 'border-primary bg-accent' : ''
+                  }`}
+              >
+                <CardContent className="p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <Badge
+                      variant={getBadgeVariant(displayWf.status)}
+                      className="text-[10px] px-1 py-0 h-5 gap-1"
+                    >
+                      {displayWf.status === 'IN_PROGRESS' && (
+                        <Loader2 className="h-2 w-2 animate-spin" />
+                      )}
+                      {displayWf.status}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(displayWf.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium line-clamp-2 leading-tight text-foreground/90">
+                    {displayWf.originalInput}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </ScrollArea>
     </aside>

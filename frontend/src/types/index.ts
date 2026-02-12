@@ -7,7 +7,7 @@ export type ApiResponse<T> = {
   path: string;
 };
 
-export type WorkflowStatus = 'PENDING' | 'COMPLETED' | 'FAILED'
+export type WorkflowStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
 
 export type StepResult = {
   step: string;
