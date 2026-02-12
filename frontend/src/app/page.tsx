@@ -76,10 +76,21 @@ export default function Dashboard() {
                   ? 'Backend Degraded'
                   : 'Backend Down'}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              {isHealthChecking
-                ? 'Checking backend status...'
-                : 'The backend is not responding properly.'}
+            <p className="text-sm text-muted-foreground flex flex-col gap-2">
+              <span>
+                {isHealthChecking
+                  ? 'Waking up the backend server (Render cold start). This can take 30-60 seconds on the first request :)'
+                  : 'The backend is still starting up on Render. The app will load automatically once it becomes available :)'}
+              </span>
+
+              <a
+                href={process.env.NEXT_PUBLIC_BACKEND_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-medium text-primary hover:opacity-80 cursor-pointer"
+              >
+                Open backend endpoint
+              </a>
             </p>
           </div>
 

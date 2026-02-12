@@ -14,21 +14,16 @@ interface HealthCheckResponse {
 export const useHealthCheck = createQuery<HealthCheckResponse, void>({
   queryKey: ['health'],
   fetcher: async () => {
-    try {
-      const { data } = await api.get<{ data: HealthCheckResponse }>('/health', {
-        timeout: 10000,
-      });
+    const { data } = await api.get<{ data: HealthCheckResponse }>('/health', {
+      timeout: 15000,
+    });
 
-      return data.data;
-    } catch {
-      return {
-        status: 'down',
-        timestamp: new Date().toISOString(),
-      };
-    }
+    return data.data;
   },
-  retry: 3,
-  retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  retry: 8,
+  retryDelay: (attemptIndex) =>
+    Math.min(2000 * 2 ** attemptIndex, 30000), // exponential backoff (max 30s)
   refetchOnWindowFocus: true,
-  refetchInterval: 60000,
+  refetchInterval: (query) =>
+    query.state.data?.status === 'ok' ? false : 5000,
 });
