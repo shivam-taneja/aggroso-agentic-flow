@@ -21,17 +21,26 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
         const isProduction =
           configService.get<string>('NODE_ENV') === 'production';
 
+        if (isProduction) {
+          return {
+            type: 'postgres',
+            url: configService.get<string>('DATABASE_URL'),
+            entities: [Workflow],
+            synchronize: false,
+            ssl: { rejectUnauthorized: false },
+          };
+        }
+
         return {
           type: 'postgres',
-          url: configService.get<string>('DATABASE_URL'),
           host: configService.get<string>('DB_HOST') || 'localhost',
           port: parseInt(configService.get<string>('DB_PORT') || '5432'),
           username: configService.get<string>('DB_USER') || 'postgres',
           password: configService.get<string>('DB_PASSWORD') || 'password',
           database: configService.get<string>('DB_NAME') || 'workflow_db',
           entities: [Workflow],
-          synchronize: !isProduction,
-          ssl: isProduction ? { rejectUnauthorized: false } : false,
+          synchronize: true,
+          ssl: false,
         };
       },
     }),
@@ -43,19 +52,17 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
         const isProduction =
           configService.get<string>('NODE_ENV') === 'production';
 
-        const redisUrl = configService.get<string>('REDIS_URL');
-
         const connectionSettings = {
           retryStrategy: (times: number) => {
             return Math.min(times * 50, 3000);
           },
         };
 
-        if (redisUrl) {
+        if (isProduction) {
           return {
             connection: {
-              url: redisUrl,
-              tls: isProduction ? { rejectUnauthorized: false } : undefined,
+              url: configService.get<string>('REDIS_URL'),
+              tls: { rejectUnauthorized: false },
               ...connectionSettings,
             },
           };
