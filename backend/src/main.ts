@@ -8,6 +8,7 @@ import { TransformInterceptor } from './interceptors/transform.interceptor';
 const VERIFIED_ORIGINS = [
   /^http:\/\/localhost(:\d+)?$/,
   /^https?:\/\/([a-z0-9-]+\.)*shivamtaneja\.com$/,
+  /^https:\/\/aggroso-agentic-flow\.onrender\.com$/,
 ];
 
 async function bootstrap() {
