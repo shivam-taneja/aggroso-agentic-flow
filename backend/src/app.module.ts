@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GeminiModule } from './modules/gemini/gemini.module';
@@ -12,6 +13,59 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('development', 'production'),
+        PORT: Joi.number().default(3000),
+
+        GEMINI_API_KEY: Joi.string().required(),
+
+        DATABASE_URL: Joi.string().when('NODE_ENV', {
+          is: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        REDIS_URL: Joi.string().when('NODE_ENV', {
+          is: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+
+        DB_HOST: Joi.string().when('NODE_ENV', {
+          not: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        DB_PORT: Joi.number().when('NODE_ENV', {
+          not: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        DB_USER: Joi.string().when('NODE_ENV', {
+          not: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        DB_PASSWORD: Joi.string().when('NODE_ENV', {
+          not: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        DB_NAME: Joi.string().when('NODE_ENV', {
+          not: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        REDIS_HOST: Joi.string().when('NODE_ENV', {
+          not: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+        REDIS_PORT: Joi.number().when('NODE_ENV', {
+          not: 'production',
+          then: Joi.required(),
+          otherwise: Joi.optional(),
+        }),
+      }),
     }),
 
     TypeOrmModule.forRootAsync({

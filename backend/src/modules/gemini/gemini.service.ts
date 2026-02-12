@@ -8,9 +8,7 @@ export class GeminiService {
   private model: GenerativeModel;
 
   constructor(private config: ConfigService) {
-    const apiKey = this.config.get<string>('GEMINI_API_KEY');
-
-    if (!apiKey) throw new Error('GEMINI_API_KEY missing!');
+    const apiKey = this.config.get<string>('GEMINI_API_KEY')!;
 
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({
