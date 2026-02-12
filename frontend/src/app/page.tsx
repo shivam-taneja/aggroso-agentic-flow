@@ -14,11 +14,15 @@ import { useGetWorkflows, usePollWorkflow } from '@/hooks/api/workflows';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
-export default function Dashboard() {
+function DashboardContent() {
   const queryClient = useQueryClient();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  const initialId = searchParams.get('id');
+  const [selectedId, setSelectedId] = useState<string | null>(initialId);
 
   const { data: health, isLoading: isHealthChecking } = useHealthCheck();
 
@@ -28,10 +32,7 @@ export default function Dashboard() {
     data,
     isLoading,
     isFetching,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage
-  } = useGetWorkflows({ variables: { limit: 10 } });
+  } = useGetWorkflows({ variables: { limit: 5 } });
 
   const history = data?.pages.flatMap((page) => page) || [];
 
@@ -49,6 +50,18 @@ export default function Dashboard() {
     }
   }, [selectedWorkflow?.status, queryClient]);
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+
+    if (selectedId) {
+      url.searchParams.set('id', selectedId);
+    } else {
+      url.searchParams.delete('id');
+    }
+
+    window.history.replaceState(null, '', url.toString());
+  }, [selectedId]);
+
   const handleNew = () => {
     setSelectedId(null);
   };
@@ -61,71 +74,77 @@ export default function Dashboard() {
 
   if (isBackendDown) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background p-6">
-        <div className="w-full max-w-md rounded-xl border bg-card shadow-lg p-6 space-y-6">
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-destructive" />
-          </div>
-
-          <div className="text-center space-y-2">
-            <h2
-              className={cn(
-                'text-lg font-semibold',
-                isHealthChecking
-                  ? 'text-muted-foreground'
-                  : health?.status === 'degraded'
-                    ? 'text-yellow-600'
-                    : 'text-red-600'
-              )}
-            >
-              {isHealthChecking
-                ? 'Checking Backend Status'
-                : health?.status === 'degraded'
-                  ? 'Backend Degraded'
-                  : 'Backend Down'}
-            </h2>
-            <p className="text-sm text-muted-foreground flex flex-col gap-2">
-              <span>
-                {isHealthChecking
-                  ? 'Waking up the backend server (Render cold start). This can take 30-60 seconds on the first request :)'
-                  : 'The backend is still starting up on Render. The app will load automatically once it becomes available :)'}
-              </span>
-
-              <a
-                href={process.env.NEXT_PUBLIC_BACKEND_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline font-medium text-primary hover:opacity-80 cursor-pointer"
-              >
-                Open backend endpoint
-              </a>
-            </p>
-          </div>
-
-          {!isHealthChecking && health?.services && (
-            <div className="space-y-2 text-sm">
-              {Object.entries(health.services).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between rounded-md border px-3 py-2"
-                >
-                  <span className="capitalize">{key}</span>
-                  <span
-                    className={cn(
-                      'font-medium',
-                      value === 'healthy' || value === 'configured'
-                        ? 'text-green-600'
-                        : 'text-red-600'
-                    )}
-                  >
-                    {value}
-                  </span>
-                </div>
-              ))}
+      <>
+        <div className="flex items-center justify-center h-screen bg-background p-6">
+          <div className="w-full max-w-md rounded-xl border bg-card shadow-lg p-6 space-y-6">
+            <div className="flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-destructive" />
             </div>
-          )}
+
+            <div className="text-center space-y-2">
+              <h2
+                className={cn(
+                  'text-lg font-semibold',
+                  isHealthChecking
+                    ? 'text-muted-foreground'
+                    : health?.status === 'degraded'
+                      ? 'text-yellow-600'
+                      : 'text-red-600'
+                )}
+              >
+                {isHealthChecking
+                  ? 'Checking Backend Status'
+                  : health?.status === 'degraded'
+                    ? 'Backend Degraded'
+                    : 'Backend Down'}
+              </h2>
+              <p className="text-sm text-muted-foreground flex flex-col gap-2">
+                <span>
+                  {isHealthChecking
+                    ? 'Waking up the backend server (Render cold start). This can take 30-60 seconds on the first request :)'
+                    : 'The backend is still starting up on Render. The app will load automatically once it becomes available :)'}
+                </span>
+
+                <a
+                  href={process.env.NEXT_PUBLIC_BACKEND_URL || "/"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium text-primary hover:opacity-80 cursor-pointer"
+                >
+                  Open backend endpoint
+                </a>
+              </p>
+            </div>
+
+            {!isHealthChecking && health?.services && (
+              <div className="space-y-2 text-sm">
+                {Object.entries(health.services).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between rounded-md border px-3 py-2"
+                  >
+                    <span className="capitalize">{key}</span>
+                    <span
+                      className={cn(
+                        'font-medium',
+                        value === 'healthy' || value === 'configured'
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                      )}
+                    >
+                      {value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+
+        <div className='absolute top-4 right-4'>
+          <ModeToggle />
+        </div>
+      </>
     );
   }
 
@@ -133,9 +152,6 @@ export default function Dashboard() {
     <SidebarProvider>
       <AppSidebar
         history={history}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
         isLoading={isHistoryLoading}
         selectedId={selectedId || undefined}
         currentWorkflow={selectedWorkflow}
@@ -176,5 +192,13 @@ export default function Dashboard() {
         </main>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

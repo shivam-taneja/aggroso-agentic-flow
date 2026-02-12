@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -18,7 +19,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Workflow } from '@/types';
 import { format } from 'date-fns';
-import { ChevronDown, Loader2, Play, Plus } from 'lucide-react';
+import { Activity, History as HistoryIcon, Loader2, Play, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { Card, CardContent } from './ui/card';
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -26,10 +28,6 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   selectedId: string | undefined;
   currentWorkflow: Workflow | null | undefined;
   isLoading?: boolean;
-
-  hasNextPage?: boolean;
-  isFetchingNextPage?: boolean;
-  fetchNextPage?: () => void;
 
   onWorkflowSelect: (workflow: Workflow) => void;
   onNew: () => void;
@@ -40,9 +38,6 @@ export function AppSidebar({
   selectedId,
   currentWorkflow,
   isLoading,
-  hasNextPage,
-  isFetchingNextPage,
-  fetchNextPage,
   onWorkflowSelect,
   onNew,
   ...props
@@ -72,7 +67,7 @@ export function AppSidebar({
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>History</SidebarGroupLabel>
+          <SidebarGroupLabel>Recent History</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {isLoading ? (
@@ -134,30 +129,40 @@ export function AppSidebar({
                     );
                   })}
 
-                  {hasNextPage && (
-                    <div className="p-2">
-                      <Button
-                        variant="ghost"
-                        className="w-full text-xs cursor-pointer"
-                        size="sm"
-                        onClick={() => fetchNextPage?.()}
-                        disabled={isFetchingNextPage}
-                      >
-                        {isFetchingNextPage ? (
-                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                        ) : (
-                          <ChevronDown className="mr-2 h-3 w-3" />
-                        )}
-                        Load More
-                      </Button>
-                    </div>
-                  )}
+                  {/* Replaced Load More with History Page Link */}
+                  <div className="p-2 pt-4">
+                    <Button
+                      variant="ghost"
+                      className="w-full text-xs cursor-pointer justify-start text-muted-foreground hover:text-foreground"
+                      size="sm"
+                      asChild
+                    >
+                      <Link href="/history">
+                        <HistoryIcon className="mr-2 h-3 w-3" />
+                        View Full History
+                      </Link>
+                    </Button>
+                  </div>
                 </>
               )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="border-t p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild size="sm">
+              <Link href="/status">
+                <Activity className="mr-2 h-4 w-4 text-muted-foreground" />
+                <span>System Status</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
