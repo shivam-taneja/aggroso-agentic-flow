@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export type WorkflowStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
+export type WorkflowStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
 
 export interface StepResult {
   step: string;

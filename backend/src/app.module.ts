@@ -1,9 +1,11 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GeminiModule } from './modules/gemini/gemini.module';
+import { Workflow } from './modules/workflow/entities/workflow.entity';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 
 @Module({
@@ -15,16 +17,58 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5435),
-        username: configService.get<string>('DB_USERNAME', 'postgres'),
-        password: configService.get<string>('DB_PASSWORD', 'dev_password'),
-        database: configService.get<string>('DB_NAME', 'dev_db'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const isProduction =
+          configService.get<string>('NODE_ENV') === 'production';
+
+        return {
+          type: 'postgres',
+          url: configService.get<string>('DATABASE_URL'),
+          host: configService.get<string>('DB_HOST') || 'localhost',
+          port: parseInt(configService.get<string>('DB_PORT') || '5432'),
+          username: configService.get<string>('DB_USER') || 'postgres',
+          password: configService.get<string>('DB_PASSWORD') || 'password',
+          database: configService.get<string>('DB_NAME') || 'workflow_db',
+          entities: [Workflow],
+          synchronize: !isProduction,
+          ssl: isProduction ? { rejectUnauthorized: false } : false,
+        };
+      },
+    }),
+
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const isProduction =
+          configService.get<string>('NODE_ENV') === 'production';
+
+        const redisUrl = configService.get<string>('REDIS_URL');
+
+        const connectionSettings = {
+          retryStrategy: (times: number) => {
+            return Math.min(times * 50, 3000);
+          },
+        };
+
+        if (redisUrl) {
+          return {
+            connection: {
+              url: redisUrl,
+              tls: isProduction ? { rejectUnauthorized: false } : undefined,
+              ...connectionSettings,
+            },
+          };
+        }
+
+        return {
+          connection: {
+            host: configService.get<string>('REDIS_HOST') || 'localhost',
+            port: parseInt(configService.get<string>('REDIS_PORT') || '6379'),
+            ...connectionSettings,
+          },
+        };
+      },
     }),
 
     GeminiModule,

@@ -17,5 +17,20 @@ services:
     ports:
       - '5436:5432'
 
+  redis_workflow:
+    image: redis:alpine
+    container_name: workflow_redis_container
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - workflow_redis_data:/data
+
 volumes:
   workflow_pg_data:
+  workflow_redis_data:
