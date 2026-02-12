@@ -5,7 +5,10 @@ import { AllExceptionsFilter } from './filters/http-exception.filter';
 import { ValidationExceptionFilter } from './filters/validation-exception.filter';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 
-const VERIFIED_ORIGINS = ['http://localhost:3001'];
+const VERIFIED_ORIGINS = [
+  /^http:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/([a-z0-9-]+\.)*shivamtaneja\.com$/,
+];
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,7 +22,11 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      if (VERIFIED_ORIGINS.includes(origin)) {
+      const isAllowed = VERIFIED_ORIGINS.some((pattern) =>
+        pattern.test(origin),
+      );
+
+      if (isAllowed) {
         return callback(null, true);
       }
 
